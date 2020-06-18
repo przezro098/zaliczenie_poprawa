@@ -2,6 +2,7 @@ package edu.iis.mto.testreactor.atm;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import edu.iis.mto.testreactor.atm.bank.AccountException;
 import edu.iis.mto.testreactor.atm.bank.AuthorizationException;
 import edu.iis.mto.testreactor.atm.bank.AuthorizationToken;
 import edu.iis.mto.testreactor.atm.bank.Bank;
@@ -9,6 +10,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
@@ -79,9 +81,26 @@ public class ATMachineTest {
         Money money = new Money(50, Money.DEFAULT_CURRENCY);
 
         Mockito.when(bank.autorize("1234", "1234")).thenReturn(AuthorizationToken.create("1"));
-        
+
         Assertions.assertThrows(ATMOperationException.class,
                 () -> atMachine.withdraw(PinCode.createPIN(1, 2, 3, 4), Card.create("1234"), money));
+
+    }
+
+    @Test void test() throws ATMOperationException, AuthorizationException {
+
+        atMachine.setDeposit(createSampleDeposit());
+        Money money = new Money(100, Money.DEFAULT_CURRENCY);
+
+        atMachine.withdraw(PinCode.createPIN(1, 2, 3, 4), Card.create("1234"), money);
+
+        Mockito.when(bank.autorize("1234", "1234")).thenReturn(AuthorizationToken.create("1"));
+
+        List<BanknotesPack> expectedMoney = new ArrayList<>();
+        expectedMoney.add(BanknotesPack.create(1, Banknote.PL_100));
+
+        InOrder inOrder = Mockito.inOrder(bank);
+        inOrder.verify(bank).autorize("1234", "1234");
 
     }
 
