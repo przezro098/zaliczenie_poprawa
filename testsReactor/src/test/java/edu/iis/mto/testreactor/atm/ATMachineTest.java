@@ -40,14 +40,13 @@ public class ATMachineTest {
         deposit.add(zl100pack);
         return MoneyDeposit.create(Money.DEFAULT_CURRENCY, deposit);
     }
-    
+
 
     @Test
     void AtmWithSufficientAmountOfMoneyShouldWithdrawInSuccess() throws ATMOperationException, AuthorizationException {
 
         atMachine.setDeposit(createSampleDeposit());
         Money money = new Money(100,Money.DEFAULT_CURRENCY);
-
 
 
         Withdrawal result = atMachine.withdraw(PinCode.createPIN(1,2,3,4), Card.create("1234"), money);
@@ -62,6 +61,25 @@ public class ATMachineTest {
         Assertions.assertEquals(result,expected);
 
 
+    }
+
+    @Test
+    void AtmWithoutSufficientAmountOfMoneyShouldWithdrawInFailure() throws ATMOperationException, AuthorizationException {
+
+        atMachine.setDeposit(createSampleDeposit());
+        Money money = new Money(100,Money.DEFAULT_CURRENCY);
+
+
+        Withdrawal result = atMachine.withdraw(PinCode.createPIN(1,2,3,4), Card.create("1234"), money);
+
+        Mockito.when(bank.autorize("1234","1234")).thenReturn(AuthorizationToken.create("1"));
+
+        List<BanknotesPack> expectedMoney = new ArrayList<>();
+        expectedMoney.add(BanknotesPack.create(2,Banknote.PL_100));
+
+        Withdrawal expected = Withdrawal.create(expectedMoney);
+
+        Assertions.assertEquals(result,expected);
     }
 
 
