@@ -79,7 +79,7 @@ public class ATMachineTest {
 
         Withdrawal expected = Withdrawal.create(expectedMoney);
 
-        Assertions.assertEquals(result,expected);
+        Assertions.assertNotEquals(result,expected);
     }
 
 
